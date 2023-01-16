@@ -190,7 +190,7 @@ def main():
     run_hand_mocap(args, bbox_detector, hand_mocap, visualizer)
 if __name__ == '__main__':
     main()
-    cmd = "rm -r mocap_output/rendered"
-    os.system(cmd)
-    cmd = "rm -r mocap_output/mocap"
-    os.system(cmd)
+    # cmd = "rm -r mocap_output/rendered"
+    # os.system(cmd)
+    # cmd = "rm -r mocap_output/mocap"
+    # os.system(cmd)

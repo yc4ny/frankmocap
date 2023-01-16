@@ -1441,7 +1441,7 @@ class AppWindow:
                     extra_params['use_pca'] = False
                     extra_params['flat_hand_mean'] = True
                     extra_params['use_face_contour'] = True
-                model = eval(body_model.upper())(f'visualizer/data/body_models/{body_model.lower()}', **extra_params)
+                model = eval(body_model.upper())(f'visualizer_body/data/body_models/{body_model.lower()}', **extra_params)
                 AppWindow.PRELOADED_BODY_MODELS[f'{body_model.lower()}-{gender.lower()}'] = model
         logger.info(f'Loaded body models {AppWindow.PRELOADED_BODY_MODELS.keys()}')
 

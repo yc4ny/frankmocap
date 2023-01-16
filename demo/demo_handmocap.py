@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 import os, sys, shutil
-sys.path.append("/home/hansookwan/MAIN/Ego4d_Codes/github_codes/frankmocap")
+sys.path.append("/home/yc4ny/frankmocap")
 import os.path as osp
 import numpy as np
 import cv2

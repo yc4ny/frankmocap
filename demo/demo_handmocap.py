@@ -110,7 +110,8 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
             continue
         
         # Hand Pose Regression
-        # Fix bounding box 
+        
+        # # Fix bbox if not detected 
         # left_fix = np.array([1165, 636, 3240-1165, 2160-636], dtype = np.float32)
         # right_fix = np.array([3000, 0,3840-3000, 2160], dtype = np.float32)
         # # If not detected replace bbox
@@ -120,6 +121,7 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         #     if hand_bbox_list[i]['right_hand'] is None:
         #         hand_bbox_list[i]['right_hand'] = right_fix
         
+        # # Fix bbox manually (set)
         # hand_bbox_list[0]['left_hand'] = np.array([1400, 820, 3240-1400, 2160-820], dtype = np.float32)
         # hand_bbox_list = np.array([{'left_hand': [1161, 646, 3240-1161, 2160 - 646], 'right_hand': [3000, 0,3840-3000, 2160]}]) 
         
@@ -127,7 +129,6 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
                 img_original_bgr, hand_bbox_list, add_margin=True)
         assert len(hand_bbox_list) == len(body_bbox_list)
         assert len(body_bbox_list) == len(pred_output_list)
-
 
 
         """DEBUGGING"""
@@ -139,8 +140,6 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         #            print(pred_output_list[0][hand_type]['pred_hand_pose'])
         #            print(pred_output_list[0][hand_type]['pred_hand_betas'])
         """DEBUGGING"""
-
-
 
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)

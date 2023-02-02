@@ -37,5 +37,5 @@ mocap_utils/frame_to_gif.py
 mocap_utils/select_epick_kitchen.py
 visualizer/data/body_models
 handmocap_output
-custom/*mp4
+trackign/*mp4
 meeting_video/

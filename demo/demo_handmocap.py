@@ -66,7 +66,6 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         
         elif input_type == 'webcam':
             _, img_original_bgr = input_data.read()
-
             if video_frame < cur_frame:
                 video_frame += 1
                 continue
@@ -109,8 +108,21 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         if len(hand_bbox_list) < 1:
             print(f"No hand deteced: {image_path}")
             continue
-    
+        
         # Hand Pose Regression
+        # Fix bounding box 
+        # left_fix = np.array([1165, 636, 3240-1165, 2160-636], dtype = np.float32)
+        # right_fix = np.array([3000, 0,3840-3000, 2160], dtype = np.float32)
+        # # If not detected replace bbox
+        # for i in range(len(hand_bbox_list)):
+        #     if hand_bbox_list[i]['left_hand'] is None:
+        #         hand_bbox_list[i]['left_hand'] = left_fix
+        #     if hand_bbox_list[i]['right_hand'] is None:
+        #         hand_bbox_list[i]['right_hand'] = right_fix
+        
+        # hand_bbox_list[0]['left_hand'] = np.array([1400, 820, 3240-1400, 2160-820], dtype = np.float32)
+        # hand_bbox_list = np.array([{'left_hand': [1161, 646, 3240-1161, 2160 - 646], 'right_hand': [3000, 0,3840-3000, 2160]}]) 
+        
         pred_output_list = hand_mocap.regress(
                 img_original_bgr, hand_bbox_list, add_margin=True)
         assert len(hand_bbox_list) == len(body_bbox_list)
@@ -148,11 +160,11 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         if args.out_dir is not None:
             demo_utils.save_res_img(args.out_dir, image_path, res_img)
 
-        # save predictions to pkl
-        if args.save_pred_pkl or True:
-            demo_type = 'hand'
-            demo_utils.save_pred_to_pkl(
-                args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
+        # # save predictions to pkl
+        # if args.save_pred_pkl or True:
+        #     demo_type = 'hand'
+        #     demo_utils.save_pred_to_pkl(
+        #         args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
 
         print(f"Processed : {image_path}")
         
@@ -168,6 +180,11 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
   
 def main():
     args = DemoOptions().parse()
+
+    # For Debugging 
+    args.input_path = 'sample_data/left_2.MP4'
+    args.out_dir = 'mocap_output'
+    args.view_type = 'ego_centric'
     args.use_smplx = True
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

@@ -49,6 +49,11 @@ class HandMocap:
 
     def __pad_and_resize(self, img, hand_bbox, add_margin, final_size=224):
         ori_height, ori_width = img.shape[:2]
+
+        #Fix bbox code 
+        # min_x, min_y = hand_bbox[:2]
+        # width, height = hand_bbox[2:]
+
         min_x, min_y = hand_bbox[:2].astype(np.int32)
         width, height = hand_bbox[2:].astype(np.int32)
         max_x = min_x + width
@@ -135,6 +140,7 @@ class HandMocap:
         """
         pred_output_list = list()
         hand_bbox_list_processed = list()
+    
 
         for hand_bboxes in hand_bbox_list:
 

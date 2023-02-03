@@ -294,7 +294,7 @@ def save_pred_to_pkl(
     pkl_path = osp.join(args.out_dir, 'mocap', pkl_name)
     gnu.make_subdir(pkl_path)
     gnu.save_pkl(pkl_path, saved_data)
-    print(f"Prediction saved: {pkl_path}")
+    # print(f"Prediction saved: {pkl_path}")
  
 
 def save_res_img(out_dir, image_path, res_img):
@@ -304,7 +304,7 @@ def save_res_img(out_dir, image_path, res_img):
     res_img_path = osp.join(out_dir, img_name)
     gnu.make_subdir(res_img_path)
     cv2.imwrite(res_img_path, res_img)
-    print(f"Visualization saved: {res_img_path}")
+    # print(f"Visualization saved: {res_img_path}")
 
 
 def gen_video_out(out_dir, seq_name):

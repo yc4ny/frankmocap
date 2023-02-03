@@ -111,7 +111,8 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         
         # Hand Pose Regression
         
-        # # Fix bbox if not detected 
+        # Fix bbox if not detected 
+
         # left_fix = np.array([1165, 636, 3240-1165, 2160-636], dtype = np.float32)
         # right_fix = np.array([3000, 0,3840-3000, 2160], dtype = np.float32)
         # # If not detected replace bbox
@@ -121,7 +122,8 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         #     if hand_bbox_list[i]['right_hand'] is None:
         #         hand_bbox_list[i]['right_hand'] = right_fix
         
-        # # Fix bbox manually (set)
+        # Fix bbox manually (set)
+
         # hand_bbox_list[0]['left_hand'] = np.array([1400, 820, 3240-1400, 2160-820], dtype = np.float32)
         # hand_bbox_list = np.array([{'left_hand': [1161, 646, 3240-1161, 2160 - 646], 'right_hand': [3000, 0,3840-3000, 2160]}]) 
         
@@ -143,28 +145,23 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
 
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)
-
         # visualize
         res_img = visualizer.visualize(
             img_original_bgr, 
             pred_mesh_list = pred_mesh_list, 
             hand_bbox_list = hand_bbox_list)
-
         # show result in the screen
         if not args.no_display:
             res_img = res_img.astype(np.uint8)
             ImShow(res_img)
-
         # save the image (we can make an option here)
         if args.out_dir is not None:
             demo_utils.save_res_img(args.out_dir, image_path, res_img)
-
-        # # save predictions to pkl
-        # if args.save_pred_pkl or True:
-        #     demo_type = 'hand'
-        #     demo_utils.save_pred_to_pkl(
-        #         args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
-
+        # save predictions to pkl
+        if args.save_pred_pkl or True:
+            demo_type = 'hand'
+            demo_utils.save_pred_to_pkl(
+                args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
         print(f"Processed : {image_path}")
         
     #save images as a video
@@ -181,7 +178,7 @@ def main():
     args = DemoOptions().parse()
 
     # For Debugging 
-    args.input_path = 'sample_data/left_2.MP4'
+    args.input_path = 'sample_data/lefthand.mp4'
     args.out_dir = 'mocap_output'
     args.view_type = 'ego_centric'
     args.use_smplx = True
@@ -201,7 +198,7 @@ def main():
     else:
         from renderer.visualizer import Visualizer
     visualizer = Visualizer(args.renderer_type)
-
+    # visualizer = None
     # run
     run_hand_mocap(args, bbox_detector, hand_mocap, visualizer)
 if __name__ == '__main__':

@@ -111,16 +111,8 @@ class Visualizer(object):
         # render predicted meshes
         if pred_mesh_list is not None:
             rend_img = self.__render_pred_verts(input_img, pred_mesh_list)
-            """DEBUGGING"""
-            print("input_img.shape: ",res_img.shape)
-            """DEBUGGING"""
+
             if rend_img is not None:
-            
-                """DEBUGGING"""
-                print("res_img.shape: ",res_img.shape)
-                print("rend_img.shape: ", rend_img.shape)
-                """DEBUGGING"""
-                
                 res_img = np.concatenate((res_img, rend_img), axis=1) # Concatenate (H, W, C) & (H, W, C) images to (H, 2W, C) image
             # res_img = rend_img
         
@@ -141,18 +133,9 @@ class Visualizer(object):
             pred_mesh_list_offset.append( {'ver': mesh_offset, 'f':mesh['faces'] })# verts = mesh['vertices']
             # faces = mesh['faces']
         if self.rendererType =="opengl_gui":
-            """DEBUGGING"""
-            # print("Inside self.__render_pred_verts: res_img.shape --> ", res_img.shape)
-            # --> We don't use opengl_gui in demo.demo --view_type ego_centric
-            """DEBUGGING"""
-            
             self._visualize_gui_naive(pred_mesh_list_offset, img_original=res_img)
             overlaidImg = None
         else:
-            """DEBUGGING"""
-            print("Inside self.__render_pred_verts: res_img.shape --> ", res_img.shape)
-            """DEBUGGING"""
-            
             """SET MAX_HEIGHT TO LIMITLESS"""
             #self._visualize_screenless_naive(pred_mesh_list_offset, img_original=res_img)
             self._visualize_screenless_naive(pred_mesh_list_offset, img_original=res_img, maxHeight = 100000)

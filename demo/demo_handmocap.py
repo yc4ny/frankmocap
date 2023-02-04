@@ -105,8 +105,17 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         if args.save_bbox_output:
             demo_utils.save_info_to_json(args, image_path, body_bbox_list, hand_bbox_list)
 
+        # If it is the first frame and no hand detected, use manually fixed bbox
+        if cur_frame == 1: 
+            left_fix = np.array([1483, 932, 1540, 1228], dtype = np.float32)
+            right_fix = np.array([3100, 1207, 538, 772], dtype = np.float32)
+            if hand_bbox_list[0]['left_hand'] is None:
+                hand_bbox_list[0]['left_hand'] = left_fix
+            if hand_bbox_list[0]['right_hand'] is None:
+                hand_bbox_list[0]['right_hand'] = right_fix
+        
         if len(hand_bbox_list) < 1:
-            print(f"No hand deteced: {image_path}")
+            print(f"No hand deteced, using tracker from previous frame: {image_path}")
             continue
         
         # Hand Pose Regression
@@ -145,15 +154,18 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
 
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)
-        # visualize
-        res_img = visualizer.visualize(
-            img_original_bgr, 
-            pred_mesh_list = pred_mesh_list, 
-            hand_bbox_list = hand_bbox_list)
+        # # visualize
+        # res_img = visualizer.visualize(
+        #     img_original_bgr, 
+        #     pred_mesh_list = pred_mesh_list, 
+        #     hand_bbox_list = hand_bbox_list)
+        #For debugging
+        res_img = img_original_bgr
+
         # show result in the screen
         if not args.no_display:
             res_img = res_img.astype(np.uint8)
-            ImShow(res_img)
+            # ImShow(res_img)
         # save the image (we can make an option here)
         if args.out_dir is not None:
             demo_utils.save_res_img(args.out_dir, image_path, res_img)
@@ -197,8 +209,8 @@ def main():
         from renderer.screen_free_visualizer import Visualizer
     else:
         from renderer.visualizer import Visualizer
-    visualizer = Visualizer(args.renderer_type)
-    # visualizer = None
+    # visualizer = Visualizer(args.renderer_type)
+    visualizer = None
     # run
     run_hand_mocap(args, bbox_detector, hand_mocap, visualizer)
 if __name__ == '__main__':

@@ -13,8 +13,6 @@ folder_path1 = "mocap_output/bbox_rendered"
 # directory containing the second set of images
 folder_path2 = "mocap_output/original_rendered"
 
-
-
 folder_path = "mocap_output/concat"
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)

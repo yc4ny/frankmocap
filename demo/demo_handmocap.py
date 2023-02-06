@@ -106,37 +106,27 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         if args.save_bbox_output:
             demo_utils.save_info_to_json(args, image_path, body_bbox_list, hand_bbox_list)
 
-        # If it is the first frame and no hand detected, use manually fixed bbox
-        left_fix = np.array([1483, 932, 1540, 1228], dtype = np.float32)
-        right_fix = np.array([3100, 1207, 538, 772], dtype = np.float32)
-        if cur_frame == 1: 
+        # Initialize hand_bbox_track for the first frame
+        if cur_frame == 1:
             if hand_bbox_list[0]['left_hand'] is None:
-                hand_bbox_list[0]['left_hand'] = left_fix
+                hand_bbox_list[0]['left_hand'] = np.array([1483, 932, 1540, 1228], dtype=np.float32)
             if hand_bbox_list[0]['right_hand'] is None:
-                hand_bbox_list[0]['right_hand'] = right_fix
-        
-        if cur_frame != 1  and hand_bbox_list[0]['left_hand'] is None:
-            print(f"Left hand not deteced, using tracker from previous frame: {image_path}")
-            previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
-            current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
-            hand_bbox_list[0]['left_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['left_hand'],previous_frame, current_frame)
+                hand_bbox_list[0]['right_hand'] = np.array([3100, 1207, 538, 772], dtype=np.float32)
+        else:
+            # Use KLT tracker for missing hand detections
+            for hand in ['left_hand', 'right_hand']:
+                if hand_bbox_list[0][hand] is None:
+                    print(f"{hand.capitalize()} not detected, using tracker from previous frame: {image_path}")
+                    previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame - 2).zfill(5) + ".jpg")
+                    current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame - 1).zfill(5) + ".jpg")
+                    hand_bbox_list[0][hand] = klt_tracker(hand_bbox_track[cur_frame - 2][0][hand], previous_frame, current_frame)
+            # Check for negative numbers or inconsistent bounding boxes
+            if check_negative_numbers(hand_bbox_list) or \
+                check_bbox_consistency(hand_bbox_list[0]['left_hand'], hand_bbox_track[cur_frame - 2][0]['left_hand']) or \
+                check_bbox_consistency(hand_bbox_list[0]['right_hand'], hand_bbox_track[cur_frame - 2][0]['right_hand']):
+                hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame - 2][0]['left_hand']
+                hand_bbox_list[0]['right_hand'] = hand_bbox_track[cur_frame - 2][0]['right_hand']
 
-        if cur_frame != 1  and hand_bbox_list[0]['right_hand'] is None:
-            print(f"Right hand not deteced, using tracker from previous frame: {image_path}")
-            previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
-            current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
-            hand_bbox_list[0]['right_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['right_hand'],previous_frame, current_frame)
-       
-        if cur_frame != 1 and check_negative_numbers(hand_bbox_list) is True:
-            hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame-2][0]['left_hand']
-            hand_bbox_list[0]['right_hand'] = hand_bbox_track[cur_frame-2][0]['right_hand']
-        
-        if cur_frame != 1 and check_bbox_consistency(hand_bbox_list[0]['left_hand'], hand_bbox_track[cur_frame-2][0]['left_hand']) is True:
-            hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame-2][0]['left_hand']
-
-        if cur_frame != 1 and check_bbox_consistency(hand_bbox_list[0]['right_hand'], hand_bbox_track[cur_frame-2][0]['right_hand']) is True:
-            hand_bbox_list[0]['right_hand'] = hand_bbox_track[cur_frame-2][0]['right_hand']
-        
         hand_bbox_track.append(hand_bbox_list)
     
         # Hand Pose Regression

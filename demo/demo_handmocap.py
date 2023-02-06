@@ -1,8 +1,8 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 import os, sys, shutil
-sys.path.append("/home/yc4ny/frankmocap")
 import os.path as osp
+sys.path.append("/home/yc4ny/frankmocap")
 import numpy as np
 import cv2
 import json
@@ -19,7 +19,7 @@ from handmocap.hand_bbox_detector import HandBboxDetector
 import renderer.image_utils as imu
 from renderer.viewer2D import ImShow
 import time
-
+from tracking.track import klt_tracker, check_negative_numbers, check_bbox_consistency
 
 def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
     #Set up input data (images or webcam)
@@ -28,7 +28,7 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
     assert args.out_dir is not None, "Please specify output dir to store the results"
     cur_frame = args.start_frame
     video_frame = 0
-
+    hand_bbox_track = []
     while True:
         # load data
         load_bbox = False
@@ -66,6 +66,7 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         
         elif input_type == 'webcam':
             _, img_original_bgr = input_data.read()
+
             if video_frame < cur_frame:
                 video_frame += 1
                 continue
@@ -106,74 +107,68 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
             demo_utils.save_info_to_json(args, image_path, body_bbox_list, hand_bbox_list)
 
         # If it is the first frame and no hand detected, use manually fixed bbox
+        left_fix = np.array([1483, 932, 1540, 1228], dtype = np.float32)
+        right_fix = np.array([3100, 1207, 538, 772], dtype = np.float32)
         if cur_frame == 1: 
-            left_fix = np.array([1483, 932, 1540, 1228], dtype = np.float32)
-            right_fix = np.array([3100, 1207, 538, 772], dtype = np.float32)
             if hand_bbox_list[0]['left_hand'] is None:
                 hand_bbox_list[0]['left_hand'] = left_fix
             if hand_bbox_list[0]['right_hand'] is None:
                 hand_bbox_list[0]['right_hand'] = right_fix
         
-        if len(hand_bbox_list) < 1:
-            print(f"No hand deteced, using tracker from previous frame: {image_path}")
-            continue
+        if cur_frame != 1  and hand_bbox_list[0]['left_hand'] is None:
+            print(f"Left hand not deteced, using tracker from previous frame: {image_path}")
+            previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
+            current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
+            hand_bbox_list[0]['left_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['left_hand'],previous_frame, current_frame)
+
+        if cur_frame != 1  and hand_bbox_list[0]['right_hand'] is None:
+            print(f"Right hand not deteced, using tracker from previous frame: {image_path}")
+            previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
+            current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
+            hand_bbox_list[0]['right_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['right_hand'],previous_frame, current_frame)
+       
+        if cur_frame != 1 and check_negative_numbers(hand_bbox_list) is True:
+            hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame-2][0]['left_hand']
+            hand_bbox_list[0]['right_hand'] = hand_bbox_track[cur_frame-2][0]['right_hand']
         
+        if cur_frame != 1 and check_bbox_consistency(hand_bbox_list[0]['left_hand'], hand_bbox_track[cur_frame-2][0]['left_hand']) is True:
+            hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame-2][0]['left_hand']
+
+        if cur_frame != 1 and check_bbox_consistency(hand_bbox_list[0]['right_hand'], hand_bbox_track[cur_frame-2][0]['right_hand']) is True:
+            hand_bbox_list[0]['right_hand'] = hand_bbox_track[cur_frame-2][0]['right_hand']
+        
+        hand_bbox_track.append(hand_bbox_list)
+    
         # Hand Pose Regression
-        
-        # Fix bbox if not detected 
-
-        # left_fix = np.array([1165, 636, 3240-1165, 2160-636], dtype = np.float32)
-        # right_fix = np.array([3000, 0,3840-3000, 2160], dtype = np.float32)
-        # # If not detected replace bbox
-        # for i in range(len(hand_bbox_list)):
-        #     if hand_bbox_list[i]['left_hand'] is None:
-        #         hand_bbox_list[i]['left_hand'] = left_fix
-        #     if hand_bbox_list[i]['right_hand'] is None:
-        #         hand_bbox_list[i]['right_hand'] = right_fix
-        
-        # Fix bbox manually (set)
-
-        # hand_bbox_list[0]['left_hand'] = np.array([1400, 820, 3240-1400, 2160-820], dtype = np.float32)
-        # hand_bbox_list = np.array([{'left_hand': [1161, 646, 3240-1161, 2160 - 646], 'right_hand': [3000, 0,3840-3000, 2160]}]) 
-        
         pred_output_list = hand_mocap.regress(
                 img_original_bgr, hand_bbox_list, add_margin=True)
         assert len(hand_bbox_list) == len(body_bbox_list)
         assert len(body_bbox_list) == len(pred_output_list)
 
-
-        """DEBUGGING"""
-        #for hand_type in ["left_hand", "right_hand"]:
-        #    if len(pred_output_list) > 0:
-        #        if hand_type in pred_output_list[0].keys():
-        #            print(pred_output_list[0][hand_type]['pred_vertices_smpl'])
-        #            print(pred_output_list[0][hand_type]['pred_joints_smpl'])
-        #            print(pred_output_list[0][hand_type]['pred_hand_pose'])
-        #            print(pred_output_list[0][hand_type]['pred_hand_betas'])
-        """DEBUGGING"""
-
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)
-        # # visualize
-        # res_img = visualizer.visualize(
-        #     img_original_bgr, 
-        #     pred_mesh_list = pred_mesh_list, 
-        #     hand_bbox_list = hand_bbox_list)
-        #For debugging
-        res_img = img_original_bgr
+
+        # visualize
+        res_img = visualizer.visualize(
+            img_original_bgr, 
+            pred_mesh_list = pred_mesh_list, 
+            hand_bbox_list = hand_bbox_list)
 
         # show result in the screen
         if not args.no_display:
             res_img = res_img.astype(np.uint8)
-            # ImShow(res_img)
+            ImShow(res_img)
+
         # save the image (we can make an option here)
         if args.out_dir is not None:
             demo_utils.save_res_img(args.out_dir, image_path, res_img)
-        # save predictions to pkl
-        if args.save_pred_pkl or True:
-            demo_type = 'hand'
-            demo_utils.save_pred_to_pkl(
-                args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
+
+        # # save predictions to pkl
+        # if args.save_pred_pkl:
+        #     demo_type = 'hand'
+        #     demo_utils.save_pred_to_pkl(
+        #         args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
+
         print(f"Processed : {image_path}")
         
     #save images as a video
@@ -188,7 +183,6 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
   
 def main():
     args = DemoOptions().parse()
-
     # For Debugging 
     args.input_path = 'sample_data/lefthand.mp4'
     args.out_dir = 'mocap_output'
@@ -209,13 +203,11 @@ def main():
         from renderer.screen_free_visualizer import Visualizer
     else:
         from renderer.visualizer import Visualizer
-    # visualizer = Visualizer(args.renderer_type)
-    visualizer = None
+    visualizer = Visualizer(args.renderer_type)
+
     # run
     run_hand_mocap(args, bbox_detector, hand_mocap, visualizer)
+   
+
 if __name__ == '__main__':
     main()
-    # cmd = "rm -r mocap_output/rendered"
-    # os.system(cmd)
-    # cmd = "rm -r mocap_output/mocap"
-    # os.system(cmd)

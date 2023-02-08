@@ -19,7 +19,7 @@ from handmocap.hand_bbox_detector import HandBboxDetector
 import renderer.image_utils as imu
 from renderer.viewer2D import ImShow
 import time
-from tracking.track import klt_tracker, check_negative_numbers, check_bbox_consistency
+from tracking.track import tracker, check_negative_numbers, check_bbox_consistency
 
 def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
     #Set up input data (images or webcam)
@@ -119,13 +119,13 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
             print(f"Left hand not deteced, using tracker from previous frame: {image_path}")
             previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
             current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
-            hand_bbox_list[0]['left_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['left_hand'],previous_frame, current_frame)
+            hand_bbox_list[0]['left_hand'] = tracker(hand_bbox_track[cur_frame-2][0]['left_hand'],previous_frame, current_frame)
 
         if cur_frame != 1  and hand_bbox_list[0]['right_hand'] is None:
             print(f"Right hand not deteced, using tracker from previous frame: {image_path}")
             previous_frame = cv2.imread("mocap_output/frames/" + str(cur_frame -2).zfill(5) + ".jpg")
             current_frame = cv2.imread("mocap_output/frames/" + str(cur_frame-1).zfill(5) + ".jpg")
-            hand_bbox_list[0]['right_hand'] = klt_tracker(hand_bbox_track[cur_frame-2][0]['right_hand'],previous_frame, current_frame)
+            hand_bbox_list[0]['right_hand'] = tracker(hand_bbox_track[cur_frame-2][0]['right_hand'],previous_frame, current_frame)
        
         if cur_frame != 1 and check_negative_numbers(hand_bbox_list) is True:
             hand_bbox_list[0]['left_hand'] = hand_bbox_track[cur_frame-2][0]['left_hand']
@@ -163,11 +163,11 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         if args.out_dir is not None:
             demo_utils.save_res_img(args.out_dir, image_path, res_img)
 
-        # # save predictions to pkl
-        # if args.save_pred_pkl:
-        #     demo_type = 'hand'
-        #     demo_utils.save_pred_to_pkl(
-        #         args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
+        # save predictions to pkl
+        if args.save_pred_pkl:
+            demo_type = 'hand'
+            demo_utils.save_pred_to_pkl(
+                args, demo_type, image_path, body_bbox_list, hand_bbox_list, pred_output_list)
 
         print(f"Processed : {image_path}")
         

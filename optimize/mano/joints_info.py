@@ -14,4 +14,36 @@
 #
 # Contact: ps-license@tuebingen.mpg.de
 
-from .model import load, MANO
+TIP_IDS = {
+    'mano': {
+            'thumb':		744,
+            'index':		320,
+            'middle':		443,
+            'ring':		    554,
+            'pinky':		671,
+        }
+}
+
+JOINT_NAMES = [
+    'wrist',
+    'index1',
+    'index2',
+    'index3',
+    'middle1',
+    'middle2',
+    'middle3',
+    'pinky1',
+    'pinky2',
+    'pinky3',
+    'ring1',
+    'ring2',
+    'ring3',
+    'thumb1',
+    'thumb2',
+    'thumb3',    
+    'thumb_tip',
+    'index_tip',
+    'middle_tip',
+    'ring_tip',
+    'pinky_tip',
+]

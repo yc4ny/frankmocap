@@ -83,7 +83,7 @@ class MANO(nn.Module):
 
     def __init__(self,
                  model_path,
-                 is_rhand=True,
+                 is_rhand,
                  data_struct=None,
                  create_betas=True,
                  betas=None,
@@ -359,7 +359,6 @@ class MANO(nn.Module):
                              global_orient=global_orient,
                              hand_pose = hand_pose,
                              full_pose=full_pose if return_full_pose else None)
-
         return output
 
     def hand_meshes(self,output, vc= colors['skin']):

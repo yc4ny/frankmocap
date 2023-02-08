@@ -39,3 +39,4 @@ visualizer/data/body_models
 handmocap_output
 trackign/*mp4
 meeting_video/
+optimize/models/mano

@@ -40,7 +40,7 @@ def check_negative_numbers(hand_bbox_list):
 
     return False
 
-def klt_tracker(prev_box, prev_frame, curr_frame):
+def tracker(prev_box, prev_frame, curr_frame):
     prev_box = np.array(prev_box, dtype=np.float32)
     prev_pts = prev_box.reshape(1, -1, 2)
 

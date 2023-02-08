@@ -143,6 +143,8 @@ if __name__ == "__main__":
     end_time = time.time()
     time_interval = end_time - start_time
     print("Optimization Time: " + str(time_interval) + "s")
+
+    
     # Visualize optimization 
     print("-------------------------------------------------------")
     print("Saving visualization of optimization process")

@@ -20,6 +20,7 @@ import renderer.image_utils as imu
 from renderer.viewer2D import ImShow
 import time
 from tracking.track import tracker, check_negative_numbers, check_bbox_consistency
+from optimize.optimize import optimize
 
 def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
     #Set up input data (images or webcam)
@@ -145,6 +146,10 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         assert len(hand_bbox_list) == len(body_bbox_list)
         assert len(body_bbox_list) == len(pred_output_list)
 
+        # pose, beta = optimize()
+        # pred_temp = pred_output_list
+        # pred_output_list[0]['left_hand']['pred_hand_pose'][:,3:] = pose 
+        # pred_output_list[0]['left_hand']['pred_hand_betas'] = beta 
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)
 
@@ -204,6 +209,7 @@ def main():
     else:
         from renderer.visualizer import Visualizer
     visualizer = Visualizer(args.renderer_type)
+    # visualizer = None
 
     # run
     run_hand_mocap(args, bbox_detector, hand_mocap, visualizer)

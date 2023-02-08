@@ -20,7 +20,7 @@ import renderer.image_utils as imu
 from renderer.viewer2D import ImShow
 import time
 from tracking.track import tracker, check_negative_numbers, check_bbox_consistency
-from optimize.optimize import optimize
+from optimize.main import optimize
 
 def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
     #Set up input data (images or webcam)

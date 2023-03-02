@@ -53,29 +53,30 @@ def mse(x_hat, x, a, cam):
 if __name__ == "__main__":
 
     gt_2d = torch.tensor([
-        [2346, 2154], # 0
-        [2550, 1580], # 1
-        [2501, 1311], # 2
-        [2409, 1224], # 3
-        [2287, 1501], # 4
-        [2205, 1199], # 5
-        [2156, 1063], # 6 
-        [1838, 1751], # 7
-        [1748, 1452], # 8
-        [1688, 1289], # 9
-        [2058, 1613], # 10
-        [1985, 1270], # 11
-        [1960, 1101], # 12
-        [2926, 2034], # 13
-        [2923, 1817], # 14
-        [2831, 1727], # 15
-        [2749, 1675], # 16
-        [2349, 1164], # 17
-        [2110, 960], # 18
-        [1920, 984], # 19
-        [1672, 1128], # 20
+        [2509, 2360], # 0
+        [2885, 1616], # 1
+        [2888, 1325], # 2
+        [2878, 1176], # 3
+        [2650, 1566], # 4
+        [2547, 1499], # 5
+        [2499, 1508], # 6 
+        [2130, 1666], # 7
+        [2121, 1411], # 8
+        [2112, 1332], # 9
+        [2381, 1575], # 10
+        [2346,1415], # 11
+        [2293,1389], # 12
+        [3050,2147], # 13
+        [3014, 1932 ], # 14
+        [2977, 1810], # 15
+        [2967, 1718], # 16
+        [2853, 1037], # 17
+        [2435,1576], # 18
+        [2239, 1381], # 19
+        [2129,1301], # 20
     ], dtype = torch.float32)
-    with open('mocap_output/mocap/00000_prediction_result.pkl', 'rb') as f:
+    
+    with open('mocap_output/mocap/00040_prediction_result.pkl', 'rb') as f:
         a = pickle.load(f)
 
     pose = a['pred_output_list'][0]['left_hand']['pred_hand_pose']
@@ -143,7 +144,6 @@ if __name__ == "__main__":
     end_time = time.time()
     time_interval = end_time - start_time
     print("Optimization Time: " + str(time_interval) + "s")
-
     
     # Visualize optimization 
     print("-------------------------------------------------------")
@@ -176,7 +176,7 @@ if __name__ == "__main__":
             joints_imgcoord = translate(gt_2d[4], joints_imgcoord)
 
             #Visualize Inference
-            img = cv2.imread("mocap_output/frames/00000.jpg")
+            img = cv2.imread("mocap_output/frames/01422.jpg")
             top_right_corner = (img.shape[1] - text_size[0] - 2000, text_size[1] + 10)
             location_time =(img.shape[1] - text_size[0] - 2000, text_size[1] + 100)
             for i, j in connections:

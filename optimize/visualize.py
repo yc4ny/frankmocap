@@ -26,14 +26,22 @@ def plot_3d_points(input_points):
     plt.show()
 
 if __name__ == "__main__":
-    with open('mocap_output/mocap/01063_prediction_result.pkl', 'rb') as f:
-        a = pickle.load(f)
-    # Pose (1,48), Beta (1,10)
-    pose = a['pred_output_list'][0]['left_hand']['pred_hand_pose']
-    global_orient = torch.from_numpy(pose[0][:3].reshape(1,3))
-    pose = torch.from_numpy(pose[0][3:].reshape(1,45))
-    beta = torch.from_numpy(a['pred_output_list'][0]['left_hand']['pred_hand_betas'])
-    translation = torch.from_numpy(a['pred_output_list'][0]['left_hand']['pred_camera'].reshape(1,3))
+    with open("optimize/output_parameters/014999.pkl",'rb') as file:
+        parameters = pickle.load(file)
+    beta = torch.Tensor(parameters['beta'])
+    global_orient = torch.Tensor(parameters['global_orient'])
+    pose = torch.Tensor(parameters['pose'])
+    cam = torch.Tensor(parameters['cam'])
+
+    # with open('mocap_output/mocap/01422_prediction_result.pkl', 'rb') as f:
+    #     a = pickle.load(f)
+
+    # pose = a['pred_output_list'][0]['left_hand']['pred_hand_pose']
+    # global_orient = torch.from_numpy(pose[0][:3].reshape(1,3))
+    # # global_orient = torch.Tensor([[0, 0, 0 ]])
+    # pose = torch.from_numpy(pose[0][3:].reshape(1,45))
+    # beta = torch.from_numpy(a['pred_output_list'][0]['left_hand']['pred_hand_betas'])
+
 
     model_path = 'optimize/models/mano'
     n_comps = 45
@@ -47,7 +55,7 @@ if __name__ == "__main__":
     output = rh_model(betas=beta,
                     global_orient=global_orient,
                     hand_pose=pose,
-                    transl=translation,
+                    transl=None,
                     return_verts=True,
                     return_tips = True)
     
@@ -56,7 +64,6 @@ if __name__ == "__main__":
     
     h_meshes = rh_model.hand_meshes(output)
     # j_meshes = rh_model.joint_meshes(output)
-
     #visualize hand mesh only
     h_meshes[0].show()
 

@@ -110,6 +110,7 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         # If it is the first frame and no hand detected, use manually fixed bbox
         left_fix = np.array([1483, 932, 1540, 1228], dtype = np.float32)
         right_fix = np.array([3100, 1207, 538, 772], dtype = np.float32)
+
         if cur_frame == 1: 
             if hand_bbox_list[0]['left_hand'] is None:
                 hand_bbox_list[0]['left_hand'] = left_fix
@@ -150,6 +151,7 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
         # pred_temp = pred_output_list
         # pred_output_list[0]['left_hand']['pred_hand_pose'][:,3:] = pose 
         # pred_output_list[0]['left_hand']['pred_hand_betas'] = beta 
+
         # extract mesh for rendering (vertices in image space and faces) from pred_output_list
         pred_mesh_list = demo_utils.extract_mesh_from_output(pred_output_list)
 
@@ -188,11 +190,18 @@ def run_hand_mocap(args, bbox_detector, hand_mocap, visualizer):
   
 def main():
     args = DemoOptions().parse()
+
     # For Debugging 
-    args.input_path = 'sample_data/lefthand.mp4'
-    args.out_dir = 'mocap_output'
-    args.view_type = 'ego_centric'
+    # args.input_path = 'hand_data/left_1.mp4'
+    # args.out_dir = 'mocap_output'
+    # args.view_type = 'ego_centric'
+
+    if not os.path.exists("mocap_output"):
+        os.makedirs("mocap_output")
+
     args.use_smplx = True
+    args.save_frame = True
+    args.save_pred_pkl = True
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     assert torch.cuda.is_available(), "Current version only supports GPU"

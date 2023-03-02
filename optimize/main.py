@@ -26,7 +26,7 @@ def translate(coord, array):
     
     return array
 
-def mse(x_hat, x, a, cam):
+def keypoint2d_loss(x_hat, x, a, cam):
     # cam =torch.Tensor(a['pred_output_list'][0]['left_hand']['pred_camera'])
     cam_scale = cam[0][0]
     cam_trans = cam[0][1:]
@@ -92,7 +92,6 @@ if __name__ == "__main__":
                         batch_size=1,
                         flat_hand_mean=False)
     # # Define the loss function
-    # criterion = torch.nn.MSELoss()
     # Define the optimizer
     optimizer = optim.Adam([beta, pose, global_orient, cam], lr=0.001)
     if not os.path.exists("optimize/frames"):
@@ -126,7 +125,7 @@ if __name__ == "__main__":
                         return_verts=True,
                         return_tips = True)
 
-        loss = mse(output.joints, gt_2d, a, cam)
+        loss = keypoint2d_loss(output.joints, gt_2d, a, cam)
         # Calculate the gradients
         loss.backward()
         # Update the beta and hand_pose parameters

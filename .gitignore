@@ -36,3 +36,6 @@ mocap_temp/
 frames
 hand_data
 colmap/
+hand_detector2d/output
+hand_detector2d/*mp4
+feature_matching/extrinsics

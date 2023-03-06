@@ -29,11 +29,11 @@ for img_path in tqdm(img_list, desc="Extracting SIFT features and computing desc
     keypoints_list.append(keypoints)
     descriptors_list.append(descriptors)
 
-for filename in sorted(os.listdir("hand_data/frames/left_1")): 
+for filename in sorted(os.listdir("hand_data/frames/undistort_left1")): 
     # Create SIFT object
     sift = cv2.xfeatures2d.SIFT_create()
     # Detect SIFT features and compute descriptors for the single image
-    single_img = cv2.imread("hand_data/frames/left_1/"+ filename , cv2.IMREAD_GRAYSCALE)
+    single_img = cv2.imread("hand_data/frames/undistort_left1"+ filename , cv2.IMREAD_GRAYSCALE)
     single_keypoints, single_descriptors = sift.detectAndCompute(single_img, None)
 
     # Find the matches between the single image and each of the other images
@@ -61,8 +61,9 @@ for filename in sorted(os.listdir("hand_data/frames/left_1")):
 
     # Save the extrinsic matrix as a pkl file
     extrinsic_matrix = np.hstack((R, t))
-    extrinsic_file = os.path.join(extrinsic_folder, "extrinsic_" + filename + ".pkl")
+    root, ext = os.path.splitext(filename)
+    extrinsic_file = os.path.join(extrinsic_folder, "extrinsic_" + root + ".pkl")
     with open(extrinsic_file, 'wb') as f:
         pickle.dump(extrinsic_matrix, f)
 
-    print("Extrinsic matrice saved for: \t" + filename)
+    print("Extrinsic matrice saved for: \t" + root)
